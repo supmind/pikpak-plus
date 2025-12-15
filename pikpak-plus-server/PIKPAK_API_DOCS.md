@@ -1,16 +1,16 @@
-# PikPak API Documentation
+# PikPak API 文档
 
-This document describes the API methods available in the `PikPakApi` class.
+本文档描述了 `PikPakApi` 类中可用的 API 方法。
 
-## Initialization
+## 初始化
 
 ```python
 pikpak = PikPakApi(
     username="your_username",
     password="your_password",
-    # Optional
+    # 可选参数
     encoded_token=None,
-    httpx_client_args=None, # e.g. {"timeout": 10, "proxies": ...}
+    httpx_client_args=None, # 例如 {"timeout": 10, "proxies": ...}
     device_id=None,
     request_max_retries=3,
     request_initial_backoff=3.0,
@@ -19,236 +19,236 @@ pikpak = PikPakApi(
 )
 ```
 
-## Authentication (`AuthMixin`)
+## 认证 (`AuthMixin`)
 
 ### `login()`
-Logs in to PikPak using the provided username and password.
-- **Returns**: `None`
-- **Updates**: `self.access_token`, `self.refresh_token`, `self.user_id`.
+使用提供的用户名和密码登录 PikPak。
+- **返回**: `None`
+- **更新**: `self.access_token`, `self.refresh_token`, `self.user_id`。
 
 ### `refresh_access_token()`
-Refreshes the access token using the stored refresh token.
-- **Returns**: `None`
-- **Updates**: `self.access_token`, `self.refresh_token`.
+使用存储的刷新令牌刷新访问令牌。
+- **返回**: `None`
+- **更新**: `self.access_token`, `self.refresh_token`。
 
 ### `get_user_info()`
-Returns a dictionary containing user information.
-- **Returns**: `Dict` with keys `username`, `user_id`, `access_token`, `refresh_token`, `encoded_token`.
+返回包含用户信息的字典。
+- **返回**: `Dict` 包含键 `username`, `user_id`, `access_token`, `refresh_token`, `encoded_token`。
 
-## File Management (`FileManagerMixin`)
+## 文件管理 (`FileManagerMixin`)
 
 ### `file_list(size=100, parent_id=None, next_page_token=None, additional_filters=None)`
-Lists files in a directory.
-- **Parameters**:
-    - `size` (int): Number of items to retrieve (default 100).
-    - `parent_id` (str): ID of the parent folder (default None for root).
-    - `next_page_token` (str): Token for the next page of results.
-    - `additional_filters` (dict): Extra filters for the query.
-- **Returns**: `Dict` containing file list data.
+列出目录中的文件。
+- **参数**:
+    - `size` (int): 要获取的项目数量（默认 100）。
+    - `parent_id` (str): 父文件夹的 ID（默认为 None，即根目录）。
+    - `next_page_token` (str): 下一页结果的令牌。
+    - `additional_filters` (dict): 查询的额外过滤器。
+- **返回**: `Dict` 包含文件列表数据。
 
 ### `create_folder(name="新建文件夹", parent_id=None)`
-Creates a new folder.
-- **Parameters**:
-    - `name` (str): Name of the folder.
-    - `parent_id` (str): ID of the parent folder.
-- **Returns**: `Dict` with the created folder info.
+创建一个新文件夹。
+- **参数**:
+    - `name` (str): 文件夹名称。
+    - `parent_id` (str): 父文件夹的 ID。
+- **返回**: `Dict` 包含创建的文件夹信息。
 
 ### `delete_to_trash(ids)`
-Moves files/folders to trash.
-- **Parameters**:
-    - `ids` (List[str]): List of file IDs to trash.
-- **Returns**: `Dict` response from API.
+将文件/文件夹移至回收站。
+- **参数**:
+    - `ids` (List[str]): 要移至回收站的文件 ID 列表。
+- **返回**: `Dict` API 的响应。
 
 ### `untrash(ids)`
-Restores files/folders from trash.
-- **Parameters**:
-    - `ids` (List[str]): List of file IDs to restore.
-- **Returns**: `Dict` response from API.
+从回收站恢复文件/文件夹。
+- **参数**:
+    - `ids` (List[str]): 要恢复的文件 ID 列表。
+- **返回**: `Dict` API 的响应。
 
 ### `delete_forever(ids)`
-Permanently deletes files/folders.
-- **Parameters**:
-    - `ids` (List[str]): List of file IDs to delete.
-- **Returns**: `Dict` response from API.
+永久删除文件/文件夹。
+- **参数**:
+    - `ids` (List[str]): 要删除的文件 ID 列表。
+- **返回**: `Dict` API 的响应。
 
 ### `file_batch_move(ids, to_parent_id=None)`
-Moves files to a different folder.
-- **Parameters**:
-    - `ids` (List[str]): IDs of files to move.
-    - `to_parent_id` (str): ID of the destination folder.
-- **Returns**: `Dict` response.
+将文件移动到不同的文件夹。
+- **参数**:
+    - `ids` (List[str]): 要移动的文件 ID。
+    - `to_parent_id` (str): 目标文件夹的 ID。
+- **返回**: `Dict` 响应。
 
 ### `file_batch_copy(ids, to_parent_id=None)`
-Copies files to a different folder.
-- **Parameters**:
-    - `ids` (List[str]): IDs of files to copy.
-    - `to_parent_id` (str): ID of the destination folder.
-- **Returns**: `Dict` response.
+将文件复制到不同的文件夹。
+- **参数**:
+    - `ids` (List[str]): 要复制的文件 ID。
+    - `to_parent_id` (str): 目标文件夹的 ID。
+- **返回**: `Dict` 响应。
 
 ### `file_rename(id, new_file_name)`
-Renames a file.
-- **Parameters**:
-    - `id` (str): ID of the file.
-    - `new_file_name` (str): New name for the file.
-- **Returns**: `Dict` response.
+重命名文件。
+- **参数**:
+    - `id` (str): 文件 ID。
+    - `new_file_name` (str): 文件的新名称。
+- **返回**: `Dict` 响应。
 
 ### `get_download_url(file_id)`
-Gets the download URL for a file.
-- **Parameters**:
-    - `file_id` (str): ID of the file.
-- **Returns**: `Dict` containing download URL and other details.
+获取文件的下载链接。
+- **参数**:
+    - `file_id` (str): 文件 ID。
+- **返回**: `Dict` 包含下载链接和其他详细信息。
 
 ### `path_to_id(path, create=False)`
-Resolves a path string (e.g., `/Folder/File`) to file IDs.
-- **Parameters**:
-    - `path` (str): The path to resolve.
-    - `create` (bool): Whether to create folders if they don't exist.
-- **Returns**: `List[Dict]` containing ID and name for each path component.
+将路径字符串（例如 `/Folder/File`）解析为文件 ID。
+- **参数**:
+    - `path` (str): 要解析的路径。
+    - `create` (bool): 如果文件夹不存在，是否创建。
+- **返回**: `List[Dict]` 包含每个路径组件的 ID 和名称。
 
 ### `file_move_or_copy_by_path(from_path, to_path, move=False, create=False)`
-Moves or copies files using paths instead of IDs.
-- **Parameters**:
-    - `from_path` (List[str]): List of source paths.
-    - `to_path` (str): Destination folder path.
-    - `move` (bool): True to move, False to copy.
-    - `create` (bool): True to create destination folders if missing.
-- **Returns**: `Dict` response.
+使用路径而不是 ID 移动或复制文件。
+- **参数**:
+    - `from_path` (List[str]): 源路径列表。
+    - `to_path` (str): 目标文件夹路径。
+    - `move` (bool): True 为移动，False 为复制。
+    - `create` (bool): 如果目标文件夹缺失，是否创建。
+- **返回**: `Dict` 响应。
 
 ### `file_batch_star(ids)`
-Stars (favorites) files.
-- **Parameters**:
-    - `ids` (List[str]): List of file IDs.
-- **Returns**: `Dict` response.
+收藏文件。
+- **参数**:
+    - `ids` (List[str]): 文件 ID 列表。
+- **返回**: `Dict` 响应。
 
 ### `file_batch_unstar(ids)`
-Unstars files.
-- **Parameters**:
-    - `ids` (List[str]): List of file IDs.
-- **Returns**: `Dict` response.
+取消收藏文件。
+- **参数**:
+    - `ids` (List[str]): 文件 ID 列表。
+- **返回**: `Dict` 响应。
 
 ### `file_star_list(size=100, next_page_token=None)`
-Lists starred files.
-- **Parameters**:
-    - `size` (int): Page size.
-    - `next_page_token` (str): Next page token.
-- **Returns**: `Dict` response.
+列出已收藏的文件。
+- **参数**:
+    - `size` (int): 页面大小。
+    - `next_page_token` (str): 下一页令牌。
+- **返回**: `Dict` 响应。
 
 ### `get_quota_info()`
-Gets storage quota information.
-- **Returns**: `Dict` response.
+获取存储配额信息。
+- **返回**: `Dict` 响应。
 
 ### `vip_info()`
-Gets VIP status information.
-- **Returns**: `Dict` response.
+获取 VIP 状态信息。
+- **返回**: `Dict` 响应。
 
 ### `get_transfer_quota()`
-Gets transfer quota information.
-- **Returns**: `Dict` response.
+获取传输配额信息。
+- **返回**: `Dict` 响应。
 
 ### `file_batch_share(ids, need_password=False, expiration_days=-1)`
-Shares files.
-- **Parameters**:
-    - `ids` (List[str]): File IDs.
-    - `need_password` (bool): Whether a password is required.
-    - `expiration_days` (int): Days until expiration (-1 for never).
-- **Returns**: `Dict` response.
+分享文件。
+- **参数**:
+    - `ids` (List[str]): 文件 ID。
+    - `need_password` (bool): 是否需要密码。
+    - `expiration_days` (int): 过期天数（-1 表示永不过期）。
+- **返回**: `Dict` 响应。
 
 ### `get_share_info(share_link, pass_code=None)`
-Gets info about a shared link.
-- **Parameters**:
-    - `share_link` (str): The share link.
-    - `pass_code` (str): The password/code.
-- **Returns**: `Dict` response.
+获取关于分享链接的信息。
+- **参数**:
+    - `share_link` (str): 分享链接。
+    - `pass_code` (str): 密码/提取码。
+- **返回**: `Dict` 响应。
 
 ### `get_share_folder(share_id, pass_code_token, parent_id=None)`
-Lists files in a shared folder.
-- **Parameters**:
-    - `share_id` (str): Share ID.
-    - `pass_code_token` (str): Token from `get_share_info`.
-    - `parent_id` (str): Parent folder ID.
-- **Returns**: `Dict` response.
+列出分享文件夹中的文件。
+- **参数**:
+    - `share_id` (str): 分享 ID。
+    - `pass_code_token` (str): 来自 `get_share_info` 的令牌。
+    - `parent_id` (str): 父文件夹 ID。
+- **返回**: `Dict` 响应。
 
 ### `restore(share_id, pass_code_token, file_ids)`
-Saves shared files to your drive.
-- **Parameters**:
-    - `share_id` (str): Share ID.
-    - `pass_code_token` (str): Token.
-    - `file_ids` (List[str]): IDs of files to save.
-- **Returns**: `Dict` response.
+保存分享的文件到你的云盘。
+- **参数**:
+    - `share_id` (str): 分享 ID。
+    - `pass_code_token` (str): 令牌。
+    - `file_ids` (List[str]): 要保存的文件 ID。
+- **返回**: `Dict` 响应。
 
-## Offline Download (`OfflineDownloadMixin`)
+## 离线下载 (`OfflineDownloadMixin`)
 
 ### `offline_download(file_url, parent_id=None, name=None)`
-Adds an offline download task (cloud download).
-- **Parameters**:
-    - `file_url` (str): URL to download (magnet, http, etc.).
-    - `parent_id` (str): Destination folder ID.
-    - `name` (str): Custom name for the file.
-- **Returns**: `Dict` response.
+添加离线下载任务（云下载）。
+- **参数**:
+    - `file_url` (str): 下载链接 (magnet, http 等)。
+    - `parent_id` (str): 目标文件夹 ID。
+    - `name` (str): 文件的自定义名称。
+- **返回**: `Dict` 响应。
 
 ### `offline_list(size=10000, next_page_token=None, phase=None)`
-Lists offline download tasks.
-- **Parameters**:
-    - `size` (int): Page size.
-    - `next_page_token` (str): Next page token.
-    - `phase` (List[str]): Status filters (default RUNNING, ERROR).
-- **Returns**: `Dict` response.
+列出离线下载任务。
+- **参数**:
+    - `size` (int): 页面大小。
+    - `next_page_token` (str): 下一页令牌。
+    - `phase` (List[str]): 状态过滤器（默认 RUNNING, ERROR）。
+- **返回**: `Dict` 响应。
 
 ### `offline_file_info(file_id)`
-Gets info for an offline file.
-- **Parameters**:
-    - `file_id` (str): File ID.
-- **Returns**: `Dict` response.
+获取离线文件信息。
+- **参数**:
+    - `file_id` (str): 文件 ID。
+- **返回**: `Dict` 响应。
 
 ### `offline_task_retry(task_id)`
-Retries a failed offline task.
-- **Parameters**:
-    - `task_id` (str): Task ID.
-- **Returns**: `Dict` response.
+重试失败的离线任务。
+- **参数**:
+    - `task_id` (str): 任务 ID。
+- **返回**: `Dict` 响应。
 
 ### `delete_tasks(task_ids, delete_files=False)`
-Deletes offline tasks.
-- **Parameters**:
-    - `task_ids` (List[str]): List of task IDs.
-    - `delete_files` (bool): Whether to also delete downloaded files.
-- **Returns**: `None`.
+删除离线任务。
+- **参数**:
+    - `task_ids` (List[str]): 任务 ID 列表。
+    - `delete_files` (bool): 是否同时删除已下载的文件。
+- **返回**: `None`。
 
 ### `get_task_status(task_id, file_id)`
-Gets the status of a specific task.
-- **Parameters**:
-    - `task_id` (str): Task ID.
-    - `file_id` (str): File ID.
-- **Returns**: `DownloadStatus` enum.
+获取特定任务的状态。
+- **参数**:
+    - `task_id` (str): 任务 ID。
+    - `file_id` (str): 文件 ID。
+- **返回**: `DownloadStatus` 枚举。
 
 ## WebDAV (`WebDavMixin`)
 
 ### `get_webdav_applications()`
-Gets WebDAV configuration and applications.
-- **Returns**: `Dict` response.
+获取 WebDAV 配置和应用列表。
+- **返回**: `Dict` 响应。
 
 ### `toggle_webdav(enable)`
-Enables or disables WebDAV.
-- **Parameters**:
-    - `enable` (bool): True to enable, False to disable.
-- **Returns**: `Dict` response.
+启用或禁用 WebDAV。
+- **参数**:
+    - `enable` (bool): True 为启用，False 为禁用。
+- **返回**: `Dict` 响应。
 
 ### `create_webdav_application(application_name)`
-Creates a new WebDAV application credential.
-- **Parameters**:
-    - `application_name` (str): Name for the app.
-- **Returns**: `Dict` response.
+创建一个新的 WebDAV 应用凭证。
+- **参数**:
+    - `application_name` (str): 应用名称。
+- **返回**: `Dict` 响应。
 
 ### `delete_webdav_application(username, password)`
-Deletes a WebDAV application.
-- **Parameters**:
-    - `username` (str): WebDAV username.
-    - `password` (str): WebDAV password.
-- **Returns**: `Dict` response.
+删除一个 WebDAV 应用。
+- **参数**:
+    - `username` (str): WebDAV 用户名。
+    - `password` (str): WebDAV 密码。
+- **返回**: `Dict` 响应。
 
 ### `modify_webdav_application(username, password, modify_props)`
-Modifies a WebDAV application.
-- **Parameters**:
-    - `username` (str): WebDAV username.
-    - `password` (str): WebDAV password.
-    - `modify_props` (Dict): Properties to change (e.g. `{"read_only": True}`).
-- **Returns**: `Dict` response.
+修改 WebDAV 应用。
+- **参数**:
+    - `username` (str): WebDAV 用户名。
+    - `password` (str): WebDAV 密码。
+    - `modify_props` (Dict): 要更改的属性 (例如 `{"read_only": True}`)。
+- **返回**: `Dict` 响应。

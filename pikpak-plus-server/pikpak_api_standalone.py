@@ -26,9 +26,9 @@ DEFAULT_TIMEOUT = 30.0
 CLIENT_ID = "YNxT9w7GMdWvEOKa"
 CLIENT_SECRET = "dbw2OtmVEeuUvIptb1Coyg"
 CLIENT_VERSION = "1.47.1"
-PACKAG_ENAME = "com.pikcloud.pikpak"
-SDK_VERSION = "2.0.4.204000 "
-APP_NAME = PACKAG_ENAME
+PACKAGE_NAME = "com.pikcloud.pikpak"
+SDK_VERSION = "2.0.4.204000"
+APP_NAME = PACKAGE_NAME
 
 SALTS = [
     "Gez0T9ijiI9WCeTsKSg3SMlx",
@@ -84,7 +84,7 @@ def device_id_generator() -> str:
 
 def captcha_sign(device_id: str, timestamp: str) -> str:
     """Generate a captcha sign."""
-    sign = CLIENT_ID + CLIENT_VERSION + PACKAG_ENAME + device_id + timestamp
+    sign = CLIENT_ID + CLIENT_VERSION + PACKAGE_NAME + device_id + timestamp
     for salt in SALTS:
         sign = hashlib.md5((sign + salt).encode()).hexdigest()
     return f"1.{sign}"
@@ -100,7 +100,7 @@ def generate_device_sign(device_id, package_name):
     return f"div101.{device_id}{md5_result}"
 
 def build_custom_user_agent(device_id, user_id):
-    device_sign = generate_device_sign(device_id, PACKAG_ENAME)
+    device_sign = generate_device_sign(device_id, PACKAGE_NAME)
     user_agent_parts = [
         f"ANDROID-{APP_NAME}/{CLIENT_VERSION}",
         "protocolVersion/200",
@@ -175,8 +175,10 @@ class PikPakApi:
         self.max_retries = request_max_retries
         self.initial_backoff = request_initial_backoff
 
-        httpx_client_args = httpx_client_args or {"timeout": 10}
-        self.httpx_client = httpx.AsyncClient(**httpx_client_args)
+        # Save client args to recreate client if needed (e.g. for WebDAV if we wanted separate clients,
+        # but here we'll try to reuse or use consistent config)
+        self.httpx_client_args = httpx_client_args or {"timeout": 10}
+        self.httpx_client = httpx.AsyncClient(**self.httpx_client_args)
         self.user_agent: Optional[str] = None
 
         if self.encoded_token:
@@ -194,11 +196,11 @@ class PikPakApi:
 
     def to_dict(self) -> Dict[str, Any]:
         """Returns the PikPakApi object as a dictionary"""
-        from types import NoneType
         data = self.__dict__.copy()
+        # Filter non-serializable types. Compatible with Python < 3.10
         keys_to_delete = [
             k for k, v in data.items()
-            if not type(v) in [str, int, float, bool, list, dict, NoneType]
+            if not type(v) in [str, int, float, bool, list, dict, type(None)]
         ]
         for k in keys_to_delete:
             del data[k]
@@ -340,7 +342,7 @@ class PikPakApi:
             meta = {
                 "captcha_sign": captcha_sign(self.device_id, t),
                 "client_version": CLIENT_VERSION,
-                "package_name": PACKAG_ENAME,
+                "package_name": PACKAGE_NAME,
                 "user_id": self.user_id,
                 "timestamp": t,
             }
@@ -740,7 +742,8 @@ class PikPakApi:
     async def get_webdav_applications(self) -> Dict[str, Any]:
         url = f"{WEBDAV_BASE_URL}/webdav/v1/applications"
         headers = self._get_webdav_headers()
-        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+        # Use a new client but with the same args (e.g. proxies) as the main client
+        async with httpx.AsyncClient(**self.httpx_client_args) as client:
             response = await client.get(url, headers=headers)
             response.raise_for_status()
             return response.json()
@@ -749,7 +752,7 @@ class PikPakApi:
         url = f"{WEBDAV_BASE_URL}/webdav/v1/toggle-enable"
         headers = self._get_webdav_headers()
         data = {"enable": enable}
-        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+        async with httpx.AsyncClient(**self.httpx_client_args) as client:
             response = await client.post(url, headers=headers, json=data)
             response.raise_for_status()
             return response.json()
@@ -758,7 +761,7 @@ class PikPakApi:
         url = f"{WEBDAV_BASE_URL}/webdav/v1/application"
         headers = self._get_webdav_headers()
         data = {"application_name": application_name}
-        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+        async with httpx.AsyncClient(**self.httpx_client_args) as client:
             response = await client.post(url, headers=headers, json=data)
             response.raise_for_status()
             return response.json()
@@ -767,7 +770,7 @@ class PikPakApi:
         url = f"{WEBDAV_BASE_URL}/webdav/v1/application"
         headers = self._get_webdav_headers()
         data = {"username": username, "password": password}
-        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+        async with httpx.AsyncClient(**self.httpx_client_args) as client:
             response = await client.request("DELETE", url, headers=headers, json=data)
             response.raise_for_status()
             return response.json()
@@ -776,7 +779,7 @@ class PikPakApi:
         url = f"{WEBDAV_BASE_URL}/webdav/v1/application"
         headers = self._get_webdav_headers()
         data = {"username": username, "password": password, "modify_props": modify_props}
-        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+        async with httpx.AsyncClient(**self.httpx_client_args) as client:
             response = await client.patch(url, headers=headers, json=data)
             response.raise_for_status()
             return response.json()
