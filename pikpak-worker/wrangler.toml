@@ -1,0 +1,14 @@
+name = "pikpak-downloader-bot"
+main = "src/index.ts"
+compatibility_date = "2024-05-20"
+
+[vars]
+# You will set these in Cloudflare Dashboard or via wrangler secret put
+# PIKPAK_USERNAME = "..."
+# PIKPAK_PASSWORD = "..."
+# TELEGRAM_BOT_TOKEN = "..."
+
+[[kv_namespaces]]
+binding = "DB"
+id = "xxx" # Run `wrangler kv:namespace create DB` to get this ID
+preview_id = "xxx"
